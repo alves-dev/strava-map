@@ -1,0 +1,6 @@
+{
+    "client_id": "12345",
+    "client_secret": "6adf73thkjg88eee2d7bbdfb74g4ief",
+    "redirect_uri": "http://localhost",
+    "scope": "activity:read_all,profile:read_all"
+}

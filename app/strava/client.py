@@ -5,19 +5,20 @@ from app.config.setting import setting
 STRAVA_BASE_API = 'https://www.strava.com/api/v3'
 STRAVA_ACTIVITIES_API = f'{STRAVA_BASE_API}/athlete/activities'
 
-headers = {
-    'Authorization': f'Bearer {setting.STRAVA_ACCESS_TOKEN}'
-}
-
 PER_PAGE = 100
 
 
-def get_activities() -> dict:
+def get_activities(token: str) -> dict:
     params = {
         'per_page': PER_PAGE,
         'page': 1,
         'after': setting.STRAVA_ACTIVITIES_AFTER
     }
+
+    headers = {
+        'Authorization': f'Bearer {token}'
+    }
+
     try:
         resp = requests.get(STRAVA_ACTIVITIES_API, headers=headers, params=params)
         resp.raise_for_status()
@@ -36,10 +37,10 @@ def get_properties(activity: dict) -> dict:
         "date": str(activity.get('start_date_local')).replace('T', ' ')[:16],
         "distance": distance,
         "type": activity.get('type'),
-        "color": get_color(activity.get('type'))
+        "color": _get_color(activity.get('type'))
     }
 
-def get_color(type: str) -> int:
+def _get_color(type: str) -> int:
     """
     Cada número no grafana é convertido para uma cor
     """
