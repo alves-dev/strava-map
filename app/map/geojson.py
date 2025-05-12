@@ -6,11 +6,15 @@ import polyline
 from app.strava import client as strava
 
 
-def create_geojson(activities: dict):
+def create_geojson(activities: dict, token: str):
     features = []
 
     for activity in activities:
-        poly = activity.get('map', {}).get('summary_polyline')
+        id = activity.get('id')
+        activity_by_id = strava.get_activities_by_id(token, id)
+
+        poly = activity_by_id.get('map', {}).get('polyline')
+
         if not poly:
             continue
 

@@ -8,7 +8,7 @@ def init():
     if token is None:
         return
     activities = strava.get_activities(token)
-    geojson.create_geojson(activities)
+    geojson.create_geojson(activities, token)
 
 
 if __name__ == "__main__":
