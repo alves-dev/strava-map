@@ -1,30 +1,25 @@
-import json
 import os
 from pathlib import Path
 
 import requests
 
+from app.config.setting import setting
+
 root_path = Path(__file__).parent.parent.parent.resolve()
 
-# Nome do arquivo de configuração principal
-CONFIG_FILE = root_path / 'config.json'
 # Nome do arquivo para armazenar o refresh token
 REFRESH_TOKEN_FILE = root_path / 'refresh_token.txt'
 
 
 def get_access_token() -> str | None:
     """Obtém um access token válido, seja do refresh token ou solicitando autorização inicial."""
-    config = _load_config()
-    if not config:
-        return None
-
-    client_id = config.get('client_id')
-    client_secret = config.get('client_secret')
-    redirect_uri = config.get('redirect_uri', 'http://localhost')  # Valor padrão se não estiver no config
-    scope = config.get('scope', 'activity:read_all,profile:read_all')  # Escopo padrão
+    client_id = setting.STRAVA_CLIENT_ID
+    client_secret = setting.STRAVA_CLIENT_SECRET
+    redirect_uri = setting.STRAVA_REDIRECT_URI
+    scope = setting.STRAVA_SCOPE
 
     if not client_id or not client_secret:
-        print(f"Por favor, configure seu 'client_id' e 'client_secret' no arquivo '{CONFIG_FILE}'.")
+        print("Por favor, configure seu 'STRAVA_CLIENT_ID' e 'STRAVA_CLIENT_SECRET' no .env")
         return None
 
     stored_refresh_token = _load_refresh_token()
@@ -61,20 +56,6 @@ def get_access_token() -> str | None:
             print("Nenhum código de autorização fornecido.")
 
     return None
-
-
-def _load_config() -> dict | None:
-    """Carrega as configurações do arquivo config.json."""
-    try:
-        with open(CONFIG_FILE, 'r') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        print(
-            f"Arquivo de configuração '{CONFIG_FILE}' não encontrado. Crie este arquivo com suas credenciais, como no 'config.example.json'")
-        return None
-    except json.JSONDecodeError:
-        print(f"Erro ao decodificar o arquivo de configuração '{CONFIG_FILE}'. Verifique o formato JSON.")
-        return None
 
 
 def _load_refresh_token() -> str | None:
