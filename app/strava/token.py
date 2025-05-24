@@ -1,14 +1,13 @@
-import os
 from pathlib import Path
 
 import requests
 
 from app.config.setting import setting
+from app.repository.store import get_store
 
 root_path = Path(__file__).parent.parent.parent.resolve()
 
-# Nome do arquivo para armazenar o refresh token
-REFRESH_TOKEN_FILE = root_path / 'refresh_token.txt'
+REFRESH_TOKEN_KEY = 'strava-refresh-token'
 
 
 def get_access_token() -> str | None:
@@ -35,8 +34,9 @@ def get_access_token() -> str | None:
             print("Será necessário realizar a autorização inicial novamente.")
 
             # Remove o refresh token inválido para forçar a nova autorização
-            if os.path.exists(REFRESH_TOKEN_FILE):
-                os.remove(REFRESH_TOKEN_FILE)
+            store = get_store()
+            store.add(REFRESH_TOKEN_KEY, None)
+
     else:
         print("Nenhum refresh token encontrado. Iniciando o fluxo de autorização.")
         authorization_url = _get_authorization_url(client_id, redirect_uri, scope)
@@ -59,15 +59,10 @@ def get_access_token() -> str | None:
 
 
 def _load_refresh_token() -> str | None:
-    """Carrega o refresh token do arquivo refresh_token.txt"""
-    try:
-        with open(REFRESH_TOKEN_FILE, 'r') as f:
-            return f.read().strip()
-    except FileNotFoundError:
-        return None
-    except IOError:
-        print(f"Erro ao ler o refresh token do arquivo '{REFRESH_TOKEN_FILE}'.")
-        return None
+    """Carrega o refresh token da base"""
+    store = get_store()
+    value = store.get(REFRESH_TOKEN_KEY)
+    return value
 
 
 def _refresh_access_token(client_id, client_secret, refresh_token) -> dict:
@@ -83,14 +78,10 @@ def _refresh_access_token(client_id, client_secret, refresh_token) -> dict:
     return response.json()
 
 
-def _save_refresh_token(refresh_token):
-    """Salva o refresh token no arquivo refresh_token.txt."""
-    try:
-        with open(REFRESH_TOKEN_FILE, 'w') as f:
-            f.write(refresh_token)
-        print(f"Refresh token salvo com sucesso em '{REFRESH_TOKEN_FILE}'.")
-    except IOError:
-        print(f"Erro ao salvar o refresh token no arquivo '{REFRESH_TOKEN_FILE}'.")
+def _save_refresh_token(refresh_token: str):
+    """Salva o refresh token na base"""
+    store = get_store()
+    store.add(REFRESH_TOKEN_KEY, refresh_token)
 
 
 def _get_authorization_url(client_id, redirect_uri, scope):
