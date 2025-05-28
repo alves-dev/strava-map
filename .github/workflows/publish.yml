@@ -1,0 +1,11 @@
+name: publish
+
+on:
+  push:
+    branches: main
+
+jobs:
+  build:
+    uses: alves-dev/actions/.github/workflows/build-docker.yml@v1
+    with:
+      image-name: ghcr.io/alves-dev/strava-map
