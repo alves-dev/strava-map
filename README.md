@@ -1,7 +1,6 @@
 # strava-map
 
 
-
 ### Links
 
 [Meu aplicativo API](https://www.strava.com/settings/api)
