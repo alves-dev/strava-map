@@ -1,8 +1,8 @@
 import json
-from pathlib import Path
 
 import polyline
 
+from app.github.commit import Commit
 from app.strava import client as strava
 
 
@@ -43,13 +43,9 @@ def save_geojson(features: list):
         "features": features
     }
 
-    root_path = Path(__file__).parent.parent.parent.resolve()
-    geojson_path = root_path / 'geojson'
+    commit = Commit()
 
-    # today = str(datetime.now().strftime("%Y-%m-%d"))
+    formated_json = json.dumps(geojson, indent=4, ensure_ascii=False)
+    commit.write_file('strava_all.json', formated_json)
 
-    with open(f'{geojson_path}/strava_all.json', 'w', encoding='utf-8') as f:
-        json.dump(geojson, f, ensure_ascii=False, indent=4)
-
-    # with open(f'{geojson_path}/strava_{today}.json', 'w', encoding='utf-8') as f:
-    #     json.dump(geojson, f, ensure_ascii=False, indent=4)
+    commit.commit_and_push('strava-activities')
